@@ -113,10 +113,11 @@ SOLAR_RADIATION_3CL = 306.4 # kWh/m2.an
 
 DHW_NEED = pd.Series([15.3, 19.8], index=pd.Index(['Single-family',	'Multi-family'], name='Housing type')) # kWh/m2.a
 DHW_EFFICIENCY = {'Electricity-Direct electric': 0.95,
-                 'Electricity-Wood stove': 0.95,
+                  'Electricity-Wood stove': 0.95,
                   'Electricity-Heat pump air': 0.95,
                   'Electricity-Heat pump': 2.5,
-                  'Electricity-Heat pump water': 2.5,
+                  'Electricity-Heat pump water': 2.5,                 
+                  'Electricity-Performance boiler' : 0.95,
                   'Natural gas-Performance boiler': 0.6,
                   'Natural gas-Standard boiler': 0.6,
                   'Natural gas-Collective boiler': 0.6,
@@ -134,6 +135,7 @@ AUXILIARY_CONSUMPTION = {'Electricity-Direct electric': 1.4,
                          'Electricity-Heat pump air': 2.17,
                          'Electricity-Heat pump': 2.17,
                          'Electricity-Heat pump water': 2.17,
+                         'Electricity-Performance boiler' : 0.079,
                          'Natural gas-Performance boiler': 3.65,
                          'Natural gas-Standard boiler': 3.65,
                          'Natural gas-Collective boiler': 3.65,
@@ -153,10 +155,11 @@ CARBON_CONTENT = {'Electricity': 0.079,
                   'Heating': 0.227
                   }
 CARBON_CONTENT = {'Electricity-Direct electric': 0.079,
-                    'Electricity-Wood stove': 0.079,
+                  'Electricity-Wood stove': 0.079,
                   'Electricity-Heat pump air': 0.079,
                   'Electricity-Heat pump': 0.079,
                   'Electricity-Heat pump water': 0.079,
+                  'Electricity-Performance boiler' : 0.079,
                   'Natural gas-Performance boiler': 0.227,
                   'Natural gas-Standard boiler': 0.227,
                   'Natural gas-Collective boiler': 0.227,
@@ -500,7 +503,16 @@ def conventional_dhw_final(index):
 
     """
     efficiency = pd.Series(index.get_level_values('Heating system')).astype('object').replace(DHW_EFFICIENCY).set_axis(index, axis=0)
+    # Force conversion to float
+    print("test2")
+    print(efficiency)
+    print("test3")
+    print(DHW_EFFICIENCY)
+    efficiency = pd.to_numeric(efficiency, errors='raise')
     dhw_need = DHW_NEED.reindex(index.get_level_values('Housing type')).set_axis(index, axis=0)
+    print("test4")
+    print(dhw_need)
+
     return dhw_need / efficiency
 
 
@@ -608,6 +620,18 @@ def find_certificate(primary_consumption, other_consumptions=None, method='3uses
 
             # maximum between energy and emission
             temp = pd.concat([certificate_energy, certificate_emission], axis=1, keys=['Energy', 'Emission'])
+            print("test5")
+            print(temp)
+
+            print("Columns with non-numeric values in temp:")
+            print(temp.applymap(type).nunique())  # Show number of types per column
+
+            is_numeric = temp.applymap(lambda x: isinstance(x, (int, float)))
+
+            print("Problematic rows:")
+            print(temp[is_numeric.any(axis=1)])
+
+
             certificate = temp.max(axis=1)
 
             return certificate

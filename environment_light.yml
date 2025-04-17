@@ -1,0 +1,31 @@
+name: envResIRF
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.8
+  - pip  # au cas où tu l'utilises manuellement, mais rien ne l'appelle ici
+  - numpy=1.23.3
+  - pandas=1.4.4
+  - scipy=1.9.3
+  - pyqt !=5.12.*
+  - matplotlib=3.5.3
+  - seaborn=0.12.0
+  - jupyterlab
+  - ipykernel
+  - rich
+  - requests
+  - psutil
+  - memory_profiler
+  - scalene
+  - docutils=0.17.1
+  - latexcodec=2.0.1
+  - mdit-py-plugins=0.3.1
+  - mdurl=0.1.2
+  - myst-parser=0.18.1
+  - pybtex=0.24.0
+  - pybtex-docutils=1.0.2
+  - pyyaml=6.0
+  - sphinx=5.0.2
+  - sphinx-rtd-theme=1.1.1
+  - sphinxcontrib-bibtex=2.5.0

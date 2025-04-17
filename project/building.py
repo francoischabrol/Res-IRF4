@@ -378,7 +378,11 @@ class ThermalBuildings:
         roof = Series(_index.get_level_values('Roof'), index=_index)
         windows = Series(_index.get_level_values('Windows'), index=_index)
         heating_system = Series(_index.get_level_values(level_heater), index=_index).astype('object')
+        #print(heating_system)
+        #print(self._efficiency)
         efficiency = to_numeric(heating_system.replace(self._efficiency))
+        print("test1")
+        print(efficiency)
         consumption = thermal.conventional_heating_final(wall, floor, roof, windows, self._ratio_surface.copy(),
                                                          efficiency, climate=climate, freq=freq, smooth=smooth,
                                                          efficiency_hour=efficiency_hour, hourly_profile=hourly_profile,
@@ -2049,6 +2053,7 @@ class AgentBuildings(ThermalBuildings):
 
             # target
             _ms_heater = _calib_heater['ms_heater']
+            print("_ms_heater :",_ms_heater) #pdm cible
             option = _calib_heater['scale']['option']
             target = _calib_heater['scale']['target']
 
@@ -2062,9 +2067,11 @@ class AgentBuildings(ThermalBuildings):
                 ms = ms[ms > 0]
             else:
                 ms = _ms_heater.copy()
-
+            print("ms : ",ms)
             ref = MultiIndex.from_tuples([('Multi-family', 'Electricity-Direct electric'), ('Single-family', 'Electricity-Direct electric')], names=['Housing type', 'Heating system final'])
-            x0 = pd.Series(0, index=ms.index).drop(ref)
+            print("ref:",ref)
+            print("ms.index:", ms.index.tolist())
+            x0 = pd.Series(0, index=ms.index).drop(ref, errors = 'ignore')
             idx = x0.index
             x0 = x0.copy().to_numpy()
             x0 = append(1, x0)
@@ -5169,17 +5176,24 @@ class AgentBuildings(ThermalBuildings):
                               s=10)"""
 
         temp = consumption_energy.copy()
+        print("test6")
+        print(consumption_energy)
         temp.index = temp.index.map(lambda x: 'Consumption {} (TWh)'.format(x))
         output.update(temp.T)
 
         temp = self.consumption_agg(prices=prices, freq='year', climate=None, standard=False,
                                     agg='heater', bill_rebate=bill_rebate).dropna()
+        print("test8")
+        print(temp)
         consumption_hp = sum([temp.loc[i] for i in self._resources_data['index']['Heat pumps'] if i in temp.index])
+        
         temp.index = temp.index.map(lambda x: 'Consumption {} (TWh)'.format(x))
+        print("test7")
+        print(temp)
         output.update(temp.T)
 
         output.update({'Consumption Heat pump (TWh)': consumption_hp})
-        output.update({'Consumption Direct electric (TWh)': output['Consumption Electricity-Direct electric (TWh)']})
+        output.update({'Consumption Direct electric (TWh)': output['Consumption Electricity-Performance boiler (TWh)']})
         output.update({'Consumption District heating (TWh)': output['Consumption Heating (TWh)']})
 
         consumption_energy_climate = None
@@ -5282,7 +5296,7 @@ class AgentBuildings(ThermalBuildings):
 
         temp = self.stock.groupby('Heating system').sum()
 
-        output['Stock Direct electric (Million)'] = temp['Electricity-Direct electric'] / 10 ** 6
+        output['Stock Direct electric (Million)'] = temp['Electricity-Performance boiler'] / 10 ** 6
         output['Stock Heat pump (Million)'] = temp['Electricity-Heat pump water'] / 10 ** 6
         if 'Electricity-Heat pump air' in temp.keys():
             output['Stock Heat pump (Million)'] += temp['Electricity-Heat pump air'] / 10 ** 6

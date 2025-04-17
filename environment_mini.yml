@@ -1,0 +1,11 @@
+name: envResIRF
+
+dependencies:
+  - python=3.8
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+
+
