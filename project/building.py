@@ -15,6 +15,9 @@
 #
 # Original author Lucas Vivier <vivier@centre-cired.fr>
 
+#This is just a test for Github
+print("test")
+
 import os
 import sys
 
